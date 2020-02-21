@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/maticnetwork/bor"
+	ethereum "github.com/maticnetwork/bor"
 	"github.com/maticnetwork/bor/common"
 	"github.com/maticnetwork/bor/common/hexutil"
 	"github.com/maticnetwork/bor/core/types"
@@ -69,6 +69,16 @@ func (ec *Client) ChainID(ctx context.Context) (*big.Int, error) {
 		return nil, err
 	}
 	return (*big.Int)(&result), err
+}
+
+// DepositByID retrieves status of deposit
+func (ec *Client) DepositByID(ctx context.Context, contractAddress common.Address, depositID *big.Int) (bool, error) {
+	var result bool
+	err := ec.c.CallContext(ctx, result, "eth_depositById", contractAddress, depositID)
+	if err != nil {
+		return false, err
+	}
+	return result, err
 }
 
 // BlockByHash returns the given full block.
@@ -322,6 +332,12 @@ func (ec *Client) SyncProgress(ctx context.Context) (*ethereum.SyncProgress, err
 // on the given channel.
 func (ec *Client) SubscribeNewHead(ctx context.Context, ch chan<- *types.Header) (ethereum.Subscription, error) {
 	return ec.c.EthSubscribe(ctx, ch, "newHeads")
+}
+
+// SubscribeNewHead subscribes to notifications about the current blockchain head
+// on the given channel.
+func (ec *Client) SubscribeNewDeposit(ctx context.Context, ch chan<- *types.Header) (ethereum.Subscription, error) {
+	return ec.c.EthSubscribe(ctx, ch, "newDeposits")
 }
 
 // State Access
